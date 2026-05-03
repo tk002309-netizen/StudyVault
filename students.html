@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Students — Admin | StudyVault</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#040d1a;--bg2:#071224;--card:#0b1929;--card2:#0f2035;--border:#1a3a5c;--gold:#f0a500;--gold2:#ffd060;--blue:#1e90ff;--teal:#00d4aa;--text:#e8f0fe;--muted:#7a9abf;--danger:#ff4b6e;--sidebar:260px;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;}
+.sidebar{width:var(--sidebar);min-height:100vh;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:200;transition:.3s;}
+.sidebar-logo{padding:22px 20px;font-size:1.1rem;font-weight:800;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.sidebar-logo span{-webkit-text-fill-color:var(--blue);}
+.admin-pill{padding:2px 8px;border-radius:50px;background:var(--gold)22;border:1px solid var(--gold)44;color:var(--gold);font-size:.62rem;font-weight:700;-webkit-text-fill-color:var(--gold);}
+.nav-section{padding:16px 12px 8px;font-size:.65rem;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 16px;margin:2px 8px;border-radius:12px;cursor:pointer;color:var(--muted);font-size:.88rem;font-weight:500;transition:.2s;text-decoration:none;}
+.nav-item:hover{background:var(--card2);color:var(--text);}
+.nav-item.active{background:var(--gold)18;color:var(--gold);font-weight:600;}
+.nav-item .icon{font-size:1rem;width:22px;text-align:center;}
+.sidebar-bottom{margin-top:auto;padding:16px;border-top:1px solid var(--border);}
+.btn-logout{width:100%;padding:10px;border-radius:10px;background:var(--danger)18;border:1px solid var(--danger)44;color:var(--danger);font-size:.85rem;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;}
+.main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;}
+.topbar{position:sticky;top:0;z-index:100;background:rgba(4,13,26,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 20px;height:60px;display:flex;align-items:center;justify-content:space-between;}
+.hamburger{display:none;background:none;border:none;color:var(--text);font-size:1.4rem;cursor:pointer;padding:4px;}
+.content{padding:24px;flex:1;}
+
+/* search bar */
+.search-bar{background:var(--card);border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;gap:10px;padding:10px 16px;margin-bottom:20px;}
+.search-bar input{flex:1;background:none;border:none;color:var(--text);font-size:.9rem;font-family:'Sora',sans-serif;outline:none;}
+.search-bar input::placeholder{color:var(--muted);}
+
+/* table */
+.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+table{width:100%;border-collapse:collapse;}
+thead{background:var(--bg2);}
+th{padding:12px 16px;text-align:left;font-size:.72rem;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;border-bottom:1px solid var(--border);}
+td{padding:14px 16px;font-size:.85rem;border-bottom:1px solid var(--border)33;vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--card2);}
+.user-cell{display:flex;align-items:center;gap:10px;}
+.mini-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--blue));display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;color:#040d1a;flex-shrink:0;}
+.badge{padding:3px 9px;border-radius:50px;font-size:.68rem;font-weight:700;}
+.b-admin{background:var(--blue)22;color:var(--blue);border:1px solid var(--blue)44;}
+.b-student{background:var(--teal)22;color:var(--teal);border:1px solid var(--teal)44;}
+.action-btns{display:flex;gap:6px;flex-wrap:wrap;}
+.btn-access{padding:5px 11px;border-radius:7px;background:var(--gold)18;border:1px solid var(--gold)44;color:var(--gold);font-size:.73rem;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;white-space:nowrap;}
+.btn-promote{padding:5px 11px;border-radius:7px;background:var(--blue)18;border:1px solid var(--blue)44;color:var(--blue);font-size:.73rem;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;white-space:nowrap;}
+.btn-del{padding:5px 11px;border-radius:7px;background:var(--danger)18;border:1px solid var(--danger)44;color:var(--danger);font-size:.73rem;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;}
+.online-dot{width:8px;height:8px;border-radius:50%;background:var(--teal);display:inline-block;margin-right:4px;}
+.offline-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block;margin-right:4px;}
+
+/* ACCESS MODAL */
+.modal-overlay{position:fixed;inset:0;background:#000000cc;z-index:500;display:none;align-items:flex-start;justify-content:center;padding:40px 20px;backdrop-filter:blur(6px);overflow-y:auto;}
+.modal-overlay.show{display:flex;}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:20px;width:100%;max-width:500px;overflow:hidden;animation:fadeUp .3s ease;margin:auto;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.modal-head{background:var(--bg2);border-bottom:1px solid var(--border);padding:18px 22px;display:flex;align-items:center;justify-content:space-between;}
+.modal-head h3{font-size:.95rem;font-weight:700;}
+.modal-close{background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;}
+.modal-body{padding:22px;}
+.modal-user-info{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:18px;display:flex;align-items:center;gap:12px;}
+.modal-user-info .avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--blue));display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:700;color:#040d1a;flex-shrink:0;}
+.subject-checkbox-list{display:flex;flex-direction:column;gap:8px;max-height:320px;overflow-y:auto;}
+.subj-check-item{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;cursor:pointer;transition:.2s;}
+.subj-check-item:hover{border-color:var(--gold)55;}
+.subj-check-item.selected{border-color:var(--teal);background:var(--teal)10;}
+.subj-check-item input[type=checkbox]{accent-color:var(--teal);width:16px;height:16px;}
+.subj-name-label{font-size:.88rem;font-weight:600;flex:1;margin-left:10px;}
+.subj-price-label{font-size:.78rem;color:var(--gold);font-weight:700;}
+.modal-footer{padding:16px 22px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;}
+.btn-cancel{padding:10px 20px;border-radius:50px;background:var(--card2);border:1px solid var(--border);color:var(--muted);font-size:.85rem;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;}
+.btn-grant{padding:10px 22px;border-radius:50px;background:linear-gradient(135deg,var(--teal),#00aa88);color:#040d1a;font-size:.85rem;font-weight:700;border:none;cursor:pointer;font-family:'Sora',sans-serif;}
+.msg{padding:10px 14px;border-radius:10px;font-size:.83rem;margin-top:12px;display:none;}
+.msg.success{background:var(--teal)22;color:var(--teal);border:1px solid var(--teal)44;display:block;}
+.msg.error{background:var(--danger)22;color:var(--danger);border:1px solid var(--danger)44;display:block;}
+.skeleton{background:linear-gradient(90deg,var(--card) 25%,var(--card2) 50%,var(--card) 75%);background-size:200%;animation:sh 1.4s infinite;border-radius:6px;}
+@keyframes sh{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.overlay{display:none;position:fixed;inset:0;background:#00000088;z-index:150;}
+@media(max-width:900px){.sidebar{left:calc(-1*var(--sidebar));}.sidebar.open{left:0;}.overlay.show{display:block;}.main{margin-left:0;}.hamburger{display:block;}.content{padding:16px;}}
+</style>
+</head>
+<body>
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-logo">Study<span>Vault</span><span class="admin-pill">ADMIN</span></div>
+  <div class="nav-section">Overview</div>
+  <a class="nav-item" href="dashboard.html"><span class="icon">📊</span>Dashboard</a>
+  <a class="nav-item active" href="students.html"><span class="icon">👥</span>Students</a>
+  <div class="nav-section">Content</div>
+  <a class="nav-item" href="subjects.html"><span class="icon">📚</span>Subjects</a>
+  <a class="nav-item" href="questions.html"><span class="icon">❓</span>Q&A Manager</a>
+  <div class="nav-section">Settings</div>
+  <a class="nav-item" href="contact-settings.html"><span class="icon">📞</span>Contact & Buy Links</a>
+  <a class="nav-item" href="watermark.html"><span class="icon">💧</span>Watermark Settings</a>
+  <div class="nav-section">Site</div>
+  <a class="nav-item" href="../index.html" target="_blank"><span class="icon">🌐</span>View User Site</a>
+  <div class="sidebar-bottom"><button class="btn-logout" id="logout-btn">🚪 Logout</button></div>
+</div>
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<div class="main">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button class="hamburger" onclick="toggleSidebar()">☰</button>
+      <div style="font-size:1rem;font-weight:700;">👥 Students Management</div>
+    </div>
+    <div style="font-size:.82rem;color:var(--muted);" id="student-count">Loading...</div>
+  </div>
+  <div class="content">
+    <div class="search-bar">
+      <span>🔍</span>
+      <input type="text" id="search" placeholder="Name ya email se search karo..." oninput="filterStudents()"/>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Role</th>
+            <th>Joined</th>
+            <th>Last Active</th>
+            <th>Purchases</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr><td colspan="6"><div class="skeleton" style="height:18px;margin:10px 0;"></div></td></tr>
+          <tr><td colspan="6"><div class="skeleton" style="height:18px;margin:10px 0;"></div></td></tr>
+          <tr><td colspan="6"><div class="skeleton" style="height:18px;margin:10px 0;"></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ACCESS MODAL -->
+<div class="modal-overlay" id="access-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>🔑 Manage Subject Access</h3>
+      <button class="modal-close" onclick="closeAccessModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-user-info">
+        <div class="avatar" id="m-avatar">S</div>
+        <div>
+          <div style="font-weight:700;font-size:.92rem" id="m-name">—</div>
+          <div style="font-size:.78rem;color:var(--muted)" id="m-email">—</div>
+        </div>
+      </div>
+      <div style="font-size:.8rem;color:var(--muted);margin-bottom:12px;font-weight:600;">Select karo jo subjects access dena chahte ho:</div>
+      <div class="subject-checkbox-list" id="subject-checkboxes"></div>
+      <div class="msg" id="access-msg"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeAccessModal()">Cancel</button>
+      <button class="btn-grant" onclick="saveAccess()">✅ Save Access</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import{getAuth,onAuthStateChanged,signOut}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import{getFirestore,doc,getDoc,getDocs,collection,updateDoc,deleteDoc,serverTimestamp}
+  from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const app=initializeApp({apiKey:"AIzaSyDY0lVUA4Ph7wV1MciIE4ICv0Wkn06nHqY",authDomain:"clash-code.firebaseapp.com",projectId:"clash-code",storageBucket:"clash-code.firebasestorage.app",messagingSenderId:"167202813766",appId:"1:167202813766:web:a2e16409f5b6d5ae569747"});
+const auth=getAuth(app);const db=getFirestore(app);
+
+let allUsers=[];let allSubjects=[];let currentEditUser=null;
+
+onAuthStateChanged(auth,async u=>{
+  if(!u){location.href='login.html';return;}
+  const snap=await getDoc(doc(db,'users',u.uid));
+  if(snap.data()?.role!=='admin'){location.href='login.html';return;}
+  loadData();
+});
+
+async function loadData(){
+  const[usersSnap,subjSnap,sessSnap]=await Promise.all([
+    getDocs(collection(db,'users')),
+    getDocs(collection(db,'subjects')),
+    getDocs(collection(db,'sessions'))
+  ]);
+  allSubjects=[];subjSnap.forEach(d=>allSubjects.push({id:d.id,...d.data()}));
+  const sessions={};sessSnap.forEach(d=>sessions[d.id]=d.data());
+  allUsers=[];
+  usersSnap.forEach(d=>allUsers.push({id:d.id,...d.data(),session:sessions[d.id]}));
+  // sort by joined desc
+  allUsers.sort((a,b)=>(b.joinedAt?.toDate?.()?.getTime()||0)-(a.joinedAt?.toDate?.()?.getTime()||0));
+  document.getElementById('student-count').textContent=`Total: ${allUsers.length} students`;
+  renderTable(allUsers);
+}
+
+function renderTable(users){
+  const tbody=document.getElementById('tbody');
+  if(!users.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">Koi student nahi mila.</td></tr>';return;}
+  tbody.innerHTML=users.map(u=>{
+    const init=(u.name||u.email||'S').charAt(0).toUpperCase();
+    const joined=u.joinedAt?.toDate?u.joinedAt.toDate().toLocaleDateString('hi-IN',{day:'numeric',month:'short',year:'numeric'}):'—';
+    const lastSeen=u.session?.lastSeen?.toDate?timeAgo(u.session.lastSeen.toDate()):(u.lastSeen?.toDate?timeAgo(u.lastSeen.toDate()):'—');
+    const isOnline=u.session?.lastSeen?.toDate&&(Date.now()-u.session.lastSeen.toDate().getTime())<5*60*1000;
+    const purchases=(u.purchases||[]).length;
+    return`<tr>
+      <td><div class="user-cell">
+        <div class="mini-avatar">${init}</div>
+        <div><div style="font-weight:600;font-size:.85rem">${u.name||'—'}</div><div style="font-size:.74rem;color:var(--muted)">${u.email||'—'}</div></div>
+      </div></td>
+      <td><span class="badge ${u.role==='admin'?'b-admin':'b-student'}">${u.role||'student'}</span></td>
+      <td style="font-size:.8rem;color:var(--muted)">${joined}</td>
+      <td style="font-size:.8rem;color:var(--muted)"><span class="${isOnline?'online-dot':'offline-dot'}"></span>${isOnline?'<span style="color:var(--teal);font-weight:600">Online</span>':lastSeen}</td>
+      <td style="font-size:.85rem;color:var(--gold);font-weight:600">${purchases} subjects</td>
+      <td><div class="action-btns">
+        <button class="btn-access" onclick="openAccessModal('${u.id}')">🔑 Access</button>
+        ${u.role!=='admin'?`<button class="btn-promote" onclick="promoteAdmin('${u.id}','${u.name||u.email}')">👑 Admin</button>`:''}
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+window.filterStudents=function(){
+  const q=document.getElementById('search').value.toLowerCase();
+  const filtered=allUsers.filter(u=>(u.name||'').toLowerCase().includes(q)||(u.email||'').toLowerCase().includes(q));
+  renderTable(filtered);
+};
+
+window.openAccessModal=function(uid){
+  const u=allUsers.find(x=>x.id===uid);if(!u)return;
+  currentEditUser=u;
+  document.getElementById('m-avatar').textContent=(u.name||u.email||'S').charAt(0).toUpperCase();
+  document.getElementById('m-name').textContent=u.name||'Student';
+  document.getElementById('m-email').textContent=u.email||'—';
+  document.getElementById('access-msg').className='msg';
+  const userPurchases=u.purchases||[];
+  document.getElementById('subject-checkboxes').innerHTML=allSubjects.map(s=>`
+    <label class="subj-check-item ${userPurchases.includes(s.id)?'selected':''}" onclick="this.classList.toggle('selected')">
+      <input type="checkbox" value="${s.id}" ${userPurchases.includes(s.id)?'checked':''}/>
+      <span class="subj-name-label">${s.emoji||'📚'} ${s.name}</span>
+      <span class="subj-price-label">${s.isFree?'Free':'₹'+s.price}</span>
+    </label>`).join('');
+  document.getElementById('access-modal').classList.add('show');
+};
+window.closeAccessModal=function(){document.getElementById('access-modal').classList.remove('show');currentEditUser=null;};
+
+window.saveAccess=async function(){
+  if(!currentEditUser)return;
+  const checked=[...document.querySelectorAll('#subject-checkboxes input:checked')].map(i=>i.value);
+  const msg=document.getElementById('access-msg');
+  try{
+    await updateDoc(doc(db,'users',currentEditUser.id),{
+      purchases:checked,
+      purchaseDetails:Object.fromEntries(checked.map(id=>[id,{date:new Date().toISOString(),grantedByAdmin:true}]))
+    });
+    msg.className='msg success';msg.textContent='✓ Access update ho gaya!';
+    // Update local
+    const idx=allUsers.findIndex(x=>x.id===currentEditUser.id);
+    if(idx>-1)allUsers[idx].purchases=checked;
+    renderTable(allUsers);
+    setTimeout(()=>closeAccessModal(),1200);
+  }catch(e){msg.className='msg error';msg.textContent='Error: '+e.message;}
+};
+
+window.promoteAdmin=async function(uid,name){
+  if(!confirm(`"${name}" ko ADMIN bana doge? Unhe poora admin access milega!`))return;
+  try{
+    await updateDoc(doc(db,'users',uid),{role:'admin'});
+    await loadData();
+  }catch(e){alert('Error: '+e.message);}
+};
+
+function timeAgo(date){
+  const diff=Math.floor((Date.now()-date.getTime())/1000);
+  if(diff<60)return diff+'s ago';
+  if(diff<3600)return Math.floor(diff/60)+'m ago';
+  if(diff<86400)return Math.floor(diff/3600)+'h ago';
+  return Math.floor(diff/86400)+'d ago';
+}
+
+document.getElementById('access-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeAccessModal();});
+document.getElementById('logout-btn').onclick=async()=>{await signOut(auth);location.href='login.html';};
+window.toggleSidebar=function(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('show');};
+window.closeSidebar=function(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('show');};
+</script>
+</body>
+</html>

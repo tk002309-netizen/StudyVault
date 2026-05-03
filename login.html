@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Admin Login — StudyVault</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#040d1a;--bg2:#071224;--card:#0b1929;--border:#1a3a5c;
+  --gold:#f0a500;--gold2:#ffd060;--blue:#1e90ff;--teal:#00d4aa;
+  --text:#e8f0fe;--muted:#7a9abf;--danger:#ff4b6e;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;padding:20px;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 70% 60% at 20% 20%,#0a2a4a66,transparent 55%),
+    radial-gradient(ellipse 50% 40% at 80% 80%,#0a1e3a55,transparent 50%),
+    radial-gradient(ellipse 30% 25% at 50% 50%,#f0a50009,transparent 60%);
+  pointer-events:none;
+}
+.logo{
+  font-size:1.6rem;font-weight:800;margin-bottom:6px;text-align:center;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  position:relative;z-index:1;
+}
+.logo span{-webkit-text-fill-color:var(--blue);}
+.subtitle{font-size:.82rem;color:var(--muted);text-align:center;margin-bottom:32px;position:relative;z-index:1;letter-spacing:.5px;}
+
+.card{
+  position:relative;z-index:1;width:100%;max-width:420px;
+  background:var(--card);border:1px solid var(--border);border-radius:20px;
+  overflow:hidden;
+}
+
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid var(--border);}
+.tab{
+  flex:1;padding:14px;text-align:center;
+  font-size:.88rem;font-weight:600;cursor:pointer;
+  color:var(--muted);border-bottom:2.5px solid transparent;
+  transition:.2s;background:none;
+  border-top:none;border-left:none;border-right:none;
+  font-family:'Sora',sans-serif;
+}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold);background:var(--gold)08;}
+
+.tab-content{display:none;padding:28px;}
+.tab-content.active{display:block;}
+
+.admin-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:4px 12px;border-radius:50px;
+  border:1px solid var(--gold)44;background:var(--gold)11;
+  color:var(--gold);font-size:.72rem;font-weight:700;letter-spacing:.5px;
+  margin-bottom:18px;
+}
+
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:7px;font-weight:600;}
+.field input{
+  width:100%;padding:13px 16px;
+  background:var(--bg2);border:1.5px solid var(--border);
+  border-radius:12px;color:var(--text);font-size:.92rem;
+  font-family:'Sora',sans-serif;outline:none;transition:.2s;
+}
+.field input:focus{border-color:var(--gold)88;}
+
+/* SECRET KEY FIELD */
+.secret-field{
+  display:flex;align-items:center;gap:10px;
+  background:var(--bg2);border:1.5px solid var(--gold)44;
+  border-radius:12px;padding:13px 16px;transition:.2s;
+}
+.secret-field:focus-within{border-color:var(--gold);}
+.secret-field input{
+  flex:1;background:none;border:none;color:var(--text);
+  font-size:.92rem;font-family:'Sora',sans-serif;outline:none;
+}
+
+.btn{
+  width:100%;padding:14px;border-radius:50px;
+  font-size:.95rem;font-weight:700;cursor:pointer;border:none;
+  transition:.25s;font-family:'Sora',sans-serif;
+  background:linear-gradient(135deg,var(--gold),#e08800);
+  color:#040d1a;box-shadow:0 0 24px var(--gold)33;
+}
+.btn:hover{opacity:.9;transform:translateY(-1px);}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+
+.msg{padding:10px 14px;border-radius:10px;font-size:.84rem;margin-top:14px;display:none;}
+.msg.error{background:var(--danger)22;color:var(--danger);border:1px solid var(--danger)44;display:block;}
+.msg.success{background:var(--teal)22;color:var(--teal);border:1px solid var(--teal)44;display:block;}
+
+.loader{
+  display:none;width:20px;height:20px;
+  border:2px solid transparent;border-top-color:var(--gold);
+  border-radius:50%;animation:spin .6s linear infinite;margin:12px auto 0;
+}
+.loader.show{display:block;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.info-note{
+  background:var(--blue)12;border:1px solid var(--blue)33;
+  border-radius:10px;padding:10px 14px;
+  font-size:.78rem;color:var(--muted);line-height:1.6;
+  margin-bottom:16px;
+}
+.info-note strong{color:var(--blue);}
+</style>
+</head>
+<body>
+
+<div class="logo">Study<span>Vault</span></div>
+<div class="subtitle">Admin Control Panel</div>
+
+<div class="card">
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('login',this)">🔐 Login</button>
+    <button class="tab" onclick="switchTab('signup',this)">➕ Create Account</button>
+  </div>
+
+  <!-- LOGIN TAB -->
+  <div class="tab-content active" id="tab-login">
+    <div class="admin-badge">🔐 ADMIN ACCESS</div>
+    <div class="field">
+      <label>Admin Email</label>
+      <input type="email" id="login-email" placeholder="admin@studyvault.com"/>
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="login-pass" placeholder="••••••••"/>
+    </div>
+    <button class="btn" id="login-btn" onclick="doLogin()">🚀 Login as Admin</button>
+    <div class="msg" id="login-msg"></div>
+    <div class="loader" id="login-loader"></div>
+  </div>
+
+  <!-- CREATE ACCOUNT TAB -->
+  <div class="tab-content" id="tab-signup">
+    <div class="admin-badge">➕ NEW ADMIN</div>
+
+    <div class="info-note">
+      <strong>Secret Key zaroori hai</strong> — sirf wahi admin account bana sakta hai jiske paas secret key ho. Yeh unauthorized access se bachata hai.
+    </div>
+
+    <div class="field">
+      <label>Full Name</label>
+      <input type="text" id="su-name" placeholder="Admin Name"/>
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="su-email" placeholder="admin@studyvault.com"/>
+    </div>
+    <div class="field">
+      <label>Password (min 6 characters)</label>
+      <input type="password" id="su-pass" placeholder="Strong password..."/>
+    </div>
+    <div class="field">
+      <label>🔑 Admin Secret Key</label>
+      <div class="secret-field">
+        <span>🔑</span>
+        <input type="password" id="su-secret" placeholder="Secret key daalo..."/>
+      </div>
+    </div>
+
+    <button class="btn" id="signup-btn" onclick="doSignup()">✅ Create Admin Account</button>
+    <div class="msg" id="signup-msg"></div>
+    <div class="loader" id="signup-loader"></div>
+  </div>
+</div>
+
+<script type="module">
+import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import{getAuth,signInWithEmailAndPassword,createUserWithEmailAndPassword,
+  updateProfile,onAuthStateChanged}
+  from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import{getFirestore,doc,getDoc,setDoc,serverTimestamp}
+  from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const app=initializeApp({
+  apiKey:"AIzaSyDY0lVUA4Ph7wV1MciIE4ICv0Wkn06nHqY",
+  authDomain:"clash-code.firebaseapp.com",
+  projectId:"clash-code",
+  storageBucket:"clash-code.firebasestorage.app",
+  messagingSenderId:"167202813766",
+  appId:"1:167202813766:web:a2e16409f5b6d5ae569747"
+});
+const auth=getAuth(app);
+const db=getFirestore(app);
+
+// ⚠️ APNI SECRET KEY YAHAN CHANGE KARO
+// Jo bhi yeh key jaanta ho wahi admin account bana sakta hai
+const ADMIN_SECRET_KEY = "studyvault@admin2025";
+
+// Already logged in admin → redirect
+onAuthStateChanged(auth,async u=>{
+  if(!u)return;
+  const snap=await getDoc(doc(db,'users',u.uid));
+  if(snap.data()?.role==='admin')window.location.href='dashboard.html';
+});
+
+// Tab switch
+window.switchTab=function(tab,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+  document.getElementById('login-msg').className='msg';
+  document.getElementById('signup-msg').className='msg';
+};
+
+// ── LOGIN ──────────────────────────────────────────────
+window.doLogin=async function(){
+  const email=document.getElementById('login-email').value.trim();
+  const pass=document.getElementById('login-pass').value;
+  const msg=document.getElementById('login-msg');
+  msg.className='msg';
+
+  if(!email||!pass){
+    msg.className='msg error';
+    msg.textContent='Email aur password dono baro.';
+    return;
+  }
+
+  const btn=document.getElementById('login-btn');
+  btn.disabled=true;
+  document.getElementById('login-loader').className='loader show';
+
+  try{
+    const cred=await signInWithEmailAndPassword(auth,email,pass);
+    const snap=await getDoc(doc(db,'users',cred.user.uid));
+    if(snap.data()?.role!=='admin'){
+      await auth.signOut();
+      msg.className='msg error';
+      msg.textContent='❌ Aapke paas admin access nahi hai.';
+      btn.disabled=false;
+      document.getElementById('login-loader').className='loader';
+      return;
+    }
+    window.location.href='dashboard.html';
+  }catch(e){
+    btn.disabled=false;
+    document.getElementById('login-loader').className='loader';
+    msg.className='msg error';
+    msg.textContent=friendlyError(e.code);
+  }
+};
+
+// ── CREATE ADMIN ACCOUNT ───────────────────────────────
+window.doSignup=async function(){
+  const name=document.getElementById('su-name').value.trim();
+  const email=document.getElementById('su-email').value.trim();
+  const pass=document.getElementById('su-pass').value;
+  const secret=document.getElementById('su-secret').value;
+  const msg=document.getElementById('signup-msg');
+  msg.className='msg';
+
+  if(!name){msg.className='msg error';msg.textContent='Naam likhna zaroori hai.';return;}
+  if(!email){msg.className='msg error';msg.textContent='Email likhna zaroori hai.';return;}
+  if(pass.length<6){msg.className='msg error';msg.textContent='Password kam se kam 6 characters ka ho.';return;}
+  if(!secret){msg.className='msg error';msg.textContent='Secret key daalo.';return;}
+
+  // Secret key check — galat key pe account nahi banega
+  if(secret!==ADMIN_SECRET_KEY){
+    msg.className='msg error';
+    msg.textContent='❌ Secret key galat hai! Sahi key se hi admin account banega.';
+    return;
+  }
+
+  const btn=document.getElementById('signup-btn');
+  btn.disabled=true;
+  document.getElementById('signup-loader').className='loader show';
+
+  try{
+    const cred=await createUserWithEmailAndPassword(auth,email,pass);
+    await updateProfile(cred.user,{displayName:name});
+
+    // Firestore mein role:'admin' ke saath save karo
+    await setDoc(doc(db,'users',cred.user.uid),{
+      name,
+      email,
+      role:'admin',
+      purchases:[],
+      joinedAt:serverTimestamp(),
+      lastSeen:serverTimestamp(),
+      photoURL:'',
+    });
+
+    msg.className='msg success';
+    msg.textContent='✅ Admin account ban gaya! Dashboard pe ja raha hun...';
+    setTimeout(()=>window.location.href='dashboard.html',1500);
+
+  }catch(e){
+    btn.disabled=false;
+    document.getElementById('signup-loader').className='loader';
+    msg.className='msg error';
+    msg.textContent=friendlyError(e.code);
+  }
+};
+
+function friendlyError(code){
+  const map={
+    'auth/user-not-found':'Yeh email registered nahi hai.',
+    'auth/wrong-password':'Password galat hai.',
+    'auth/invalid-credential':'Email ya password galat hai.',
+    'auth/email-already-in-use':'Yeh email pehle se registered hai.',
+    'auth/invalid-email':'Email format sahi nahi hai.',
+    'auth/weak-password':'Password zyada strong banao.',
+    'auth/network-request-failed':'Internet check karo.',
+  };
+  return map[code]||'Kuch galat hua. Dobara try karo.';
+}
+
+// Enter key support
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Enter')return;
+  const active=document.querySelector('.tab-content.active').id;
+  if(active==='tab-login')window.doLogin();
+  else window.doSignup();
+});
+</script>
+</body>
+</html>

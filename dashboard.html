@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Admin Dashboard — StudyVault</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#040d1a;--bg2:#071224;--card:#0b1929;--card2:#0f2035;--border:#1a3a5c;--gold:#f0a500;--gold2:#ffd060;--blue:#1e90ff;--teal:#00d4aa;--text:#e8f0fe;--muted:#7a9abf;--danger:#ff4b6e;--sidebar:260px;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar);min-height:100vh;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:200;transition:.3s;}
+.sidebar-logo{padding:22px 20px;font-size:1.1rem;font-weight:800;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.sidebar-logo span{-webkit-text-fill-color:var(--blue);}
+.admin-pill{padding:2px 8px;border-radius:50px;background:var(--gold)22;border:1px solid var(--gold)44;color:var(--gold);font-size:.62rem;font-weight:700;letter-spacing:.5px;-webkit-text-fill-color:var(--gold);}
+.nav-section{padding:16px 12px 8px;font-size:.65rem;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 16px;margin:2px 8px;border-radius:12px;cursor:pointer;color:var(--muted);font-size:.88rem;font-weight:500;transition:.2s;text-decoration:none;}
+.nav-item:hover{background:var(--card2);color:var(--text);}
+.nav-item.active{background:var(--gold)18;color:var(--gold);font-weight:600;}
+.nav-item .icon{font-size:1rem;width:22px;text-align:center;}
+.sidebar-bottom{margin-top:auto;padding:16px;border-top:1px solid var(--border);}
+.btn-logout{width:100%;padding:10px;border-radius:10px;background:var(--danger)18;border:1px solid var(--danger)44;color:var(--danger);font-size:.85rem;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;}
+
+/* MAIN */
+.main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;}
+.topbar{position:sticky;top:0;z-index:100;background:rgba(4,13,26,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;}
+.topbar-left{display:flex;align-items:center;gap:12px;}
+.hamburger{display:none;background:none;border:none;color:var(--text);font-size:1.4rem;cursor:pointer;padding:4px;}
+.topbar-title{font-size:1rem;font-weight:700;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.topbar-date{font-size:.78rem;color:var(--muted);}
+.content{padding:28px;flex:1;}
+
+/* STATS GRID */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:32px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;display:flex;align-items:center;gap:16px;transition:.2s;}
+.stat-card:hover{border-color:var(--gold)44;}
+.stat-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;}
+.si-gold{background:var(--gold)18;border:1px solid var(--gold)33;}
+.si-blue{background:var(--blue)18;border:1px solid var(--blue)33;}
+.si-teal{background:var(--teal)18;border:1px solid var(--teal)33;}
+.si-purple{background:#a855f718;border:1px solid #a855f733;}
+.si-red{background:var(--danger)18;border:1px solid var(--danger)33;}
+.stat-val{font-size:1.6rem;font-weight:800;line-height:1;}
+.stat-lbl{font-size:.75rem;color:var(--muted);margin-top:4px;}
+.stat-change{font-size:.72rem;margin-top:6px;font-weight:600;}
+.stat-change.up{color:var(--teal);}
+
+/* RECENT STUDENTS TABLE */
+.section-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.section-hd h2{font-size:1rem;font-weight:700;}
+.section-hd a{font-size:.8rem;color:var(--gold);text-decoration:none;}
+.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:28px;}
+table{width:100%;border-collapse:collapse;}
+thead{background:var(--bg2);}
+th{padding:12px 16px;text-align:left;font-size:.75rem;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;border-bottom:1px solid var(--border);}
+td{padding:13px 16px;font-size:.85rem;border-bottom:1px solid var(--border)44;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--card2);}
+.user-cell{display:flex;align-items:center;gap:10px;}
+.mini-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--blue));display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#040d1a;flex-shrink:0;}
+.badge{padding:3px 9px;border-radius:50px;font-size:.68rem;font-weight:700;}
+.b-free{background:var(--teal)22;color:var(--teal);border:1px solid var(--teal)44;}
+.b-paid{background:var(--gold)22;color:var(--gold);border:1px solid var(--gold)44;}
+.b-admin{background:var(--blue)22;color:var(--blue);border:1px solid var(--blue)44;}
+
+/* QUICK ACTION CARDS */
+.quick-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:28px;}
+.quick-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:.2s;text-decoration:none;color:var(--text);}
+.quick-card:hover{border-color:var(--gold)55;transform:translateY(-2px);}
+.quick-icon{font-size:1.6rem;}
+.quick-text{font-size:.88rem;font-weight:700;}
+.quick-sub{font-size:.74rem;color:var(--muted);margin-top:2px;}
+
+/* activity feed */
+.activity-list{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+.activity-item{padding:14px 18px;border-bottom:1px solid var(--border)44;display:flex;align-items:center;gap:12px;}
+.activity-item:last-child{border-bottom:none;}
+.act-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+.act-text{font-size:.83rem;flex:1;}
+.act-text strong{color:var(--text);}
+.act-time{font-size:.72rem;color:var(--muted);flex-shrink:0;}
+
+.skeleton{background:linear-gradient(90deg,var(--card) 25%,var(--card2) 50%,var(--card) 75%);background-size:200%;animation:sh 1.4s infinite;border-radius:8px;}
+@keyframes sh{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.overlay{display:none;position:fixed;inset:0;background:#00000088;z-index:150;}
+@media(max-width:900px){.sidebar{left:calc(-1*var(--sidebar));}.sidebar.open{left:0;}.overlay.show{display:block;}.main{margin-left:0;}.hamburger{display:block;}.content{padding:16px;}}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-logo">Study<span>Vault</span> <span class="admin-pill">ADMIN</span></div>
+
+  <div class="nav-section">Overview</div>
+  <a class="nav-item active" href="dashboard.html"><span class="icon">📊</span>Dashboard</a>
+  <a class="nav-item" href="students.html"><span class="icon">👥</span>Students</a>
+
+  <div class="nav-section">Content</div>
+  <a class="nav-item" href="subjects.html"><span class="icon">📚</span>Subjects</a>
+  <a class="nav-item" href="questions.html"><span class="icon">❓</span>Q&A Manager</a>
+
+  <div class="nav-section">Settings</div>
+  <a class="nav-item" href="contact-settings.html"><span class="icon">📞</span>Contact & Buy Links</a>
+  <a class="nav-item" href="watermark.html"><span class="icon">💧</span>Watermark Settings</a>
+
+  <div class="nav-section">Site</div>
+  <a class="nav-item" href="../index.html" target="_blank"><span class="icon">🌐</span>View User Site</a>
+
+  <div class="sidebar-bottom">
+    <button class="btn-logout" id="logout-btn">🚪 Logout</button>
+  </div>
+</div>
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="hamburger" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-title">📊 Admin Dashboard</div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-date" id="topbar-date"></div>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon si-blue">👥</div>
+        <div><div class="stat-val" id="s-users">—</div><div class="stat-lbl">Total Students</div><div class="stat-change up" id="s-users-new"></div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon si-gold">📚</div>
+        <div><div class="stat-val" id="s-subjects">—</div><div class="stat-lbl">Total Subjects</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon si-teal">❓</div>
+        <div><div class="stat-val" id="s-questions">—</div><div class="stat-lbl">Total Questions</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon si-purple">🟢</div>
+        <div><div class="stat-val" id="s-online">—</div><div class="stat-lbl">Active Today</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon si-red">🆓</div>
+        <div><div class="stat-val" id="s-free">—</div><div class="stat-lbl">Free Subjects</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon si-gold">⭐</div>
+        <div><div class="stat-val" id="s-paid">—</div><div class="stat-lbl">Paid Subjects</div></div>
+      </div>
+    </div>
+
+    <!-- QUICK ACTIONS -->
+    <div class="section-hd"><h2>⚡ Quick Actions</h2></div>
+    <div class="quick-grid">
+      <a href="subjects.html?new=1" class="quick-card">
+        <div class="quick-icon">➕</div>
+        <div><div class="quick-text">New Subject</div><div class="quick-sub">Subject create karo</div></div>
+      </a>
+      <a href="questions.html" class="quick-card">
+        <div class="quick-icon">❓</div>
+        <div><div class="quick-text">Add Question</div><div class="quick-sub">Q&A add karo</div></div>
+      </a>
+      <a href="students.html" class="quick-card">
+        <div class="quick-icon">👥</div>
+        <div><div class="quick-text">Students</div><div class="quick-sub">List & access manage karo</div></div>
+      </a>
+      <a href="contact-settings.html" class="quick-card">
+        <div class="quick-icon">📞</div>
+        <div><div class="quick-text">Buy Settings</div><div class="quick-sub">WhatsApp/Telegram/Insta</div></div>
+      </a>
+    </div>
+
+    <!-- RECENT STUDENTS -->
+    <div class="section-hd">
+      <h2>👥 Recent Students</h2>
+      <a href="students.html">Sab dekho →</a>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Joined</th>
+            <th>Last Seen</th>
+          </tr>
+        </thead>
+        <tbody id="students-table">
+          <tr><td colspan="5"><div class="skeleton" style="height:16px;margin:8px 0;"></div></td></tr>
+          <tr><td colspan="5"><div class="skeleton" style="height:16px;margin:8px 0;"></div></td></tr>
+          <tr><td colspan="5"><div class="skeleton" style="height:16px;margin:8px 0;"></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ACTIVITY -->
+    <div class="section-hd"><h2>📡 Live Session Activity</h2></div>
+    <div class="activity-list" id="activity-list">
+      <div class="activity-item"><div class="skeleton" style="width:34px;height:34px;border-radius:10px;flex-shrink:0;"></div><div class="skeleton" style="height:14px;flex:1;"></div></div>
+      <div class="activity-item"><div class="skeleton" style="width:34px;height:34px;border-radius:10px;flex-shrink:0;"></div><div class="skeleton" style="height:14px;flex:1;"></div></div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import{getAuth,onAuthStateChanged,signOut}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import{getFirestore,doc,getDoc,collection,getDocs,query,orderBy,limit,where,Timestamp}
+  from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const app=initializeApp({apiKey:"AIzaSyDY0lVUA4Ph7wV1MciIE4ICv0Wkn06nHqY",authDomain:"clash-code.firebaseapp.com",projectId:"clash-code",storageBucket:"clash-code.firebasestorage.app",messagingSenderId:"167202813766",appId:"1:167202813766:web:a2e16409f5b6d5ae569747"});
+const auth=getAuth(app);const db=getFirestore(app);
+
+// date
+document.getElementById('topbar-date').textContent=new Date().toLocaleDateString('hi-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+onAuthStateChanged(auth,async u=>{
+  if(!u){location.href='login.html';return;}
+  const snap=await getDoc(doc(db,'users',u.uid));
+  if(snap.data()?.role!=='admin'){location.href='login.html';return;}
+  loadDashboard();
+});
+
+async function loadDashboard(){
+  // All data in parallel
+  const[usersSnap,subjSnap,sessSnap]=await Promise.all([
+    getDocs(collection(db,'users')),
+    getDocs(collection(db,'subjects')),
+    getDocs(collection(db,'sessions'))
+  ]);
+
+  const users=[];usersSnap.forEach(d=>users.push({id:d.id,...d.data()}));
+  const subjects=[];subjSnap.forEach(d=>subjects.push({id:d.id,...d.data()}));
+
+  // Count questions across all subjects
+  let totalQ=0;
+  subjects.forEach(s=>totalQ+=(s.questionCount||0));
+
+  // Active today
+  const todayStart=new Date();todayStart.setHours(0,0,0,0);
+  const sessions=[];sessSnap.forEach(d=>sessions.push(d.data()));
+  const activeToday=sessions.filter(s=>{
+    if(!s.lastSeen)return false;
+    const t=s.lastSeen.toDate?s.lastSeen.toDate():new Date(s.lastSeen);
+    return t>=todayStart;
+  }).length;
+
+  const freeSubjects=subjects.filter(s=>s.isFree).length;
+  const paidSubjects=subjects.filter(s=>!s.isFree).length;
+
+  // New users this week
+  const weekAgo=new Date();weekAgo.setDate(weekAgo.getDate()-7);
+  const newThisWeek=users.filter(u=>{
+    if(!u.joinedAt)return false;
+    const t=u.joinedAt.toDate?u.joinedAt.toDate():new Date(u.joinedAt);
+    return t>=weekAgo;
+  }).length;
+
+  document.getElementById('s-users').textContent=users.length;
+  document.getElementById('s-subjects').textContent=subjects.length;
+  document.getElementById('s-questions').textContent=totalQ;
+  document.getElementById('s-online').textContent=activeToday;
+  document.getElementById('s-free').textContent=freeSubjects;
+  document.getElementById('s-paid').textContent=paidSubjects;
+  if(newThisWeek>0)document.getElementById('s-users-new').textContent=`+${newThisWeek} this week`;
+
+  // Recent students table (last 8)
+  const sorted=[...users].sort((a,b)=>{
+    const at=a.joinedAt?.toDate?.()?.getTime()||0;
+    const bt=b.joinedAt?.toDate?.()?.getTime()||0;
+    return bt-at;
+  }).slice(0,8);
+
+  document.getElementById('students-table').innerHTML=sorted.length?sorted.map(u=>{
+    const init=(u.name||u.email||'S').charAt(0).toUpperCase();
+    const joined=u.joinedAt?.toDate?u.joinedAt.toDate().toLocaleDateString('hi-IN',{day:'numeric',month:'short',year:'numeric'}):'—';
+    const seen=u.lastSeen?.toDate?timeAgo(u.lastSeen.toDate()):'—';
+    return`<tr>
+      <td><div class="user-cell"><div class="mini-avatar">${init}</div><span>${u.name||'—'}</span></div></td>
+      <td style="color:var(--muted);font-size:.8rem">${u.email||'—'}</td>
+      <td><span class="badge ${u.role==='admin'?'b-admin':'b-free'}">${u.role||'student'}</span></td>
+      <td style="font-size:.8rem;color:var(--muted)">${joined}</td>
+      <td style="font-size:.8rem;color:var(--muted)">${seen}</td>
+    </tr>`;
+  }).join(''):`<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--muted)">Koi student nahi mila.</td></tr>`;
+
+  // Activity feed from sessions
+  const recentSessions=[...sessions].sort((a,b)=>{
+    const at=a.lastSeen?.toDate?.()?.getTime()||0;
+    const bt=b.lastSeen?.toDate?.()?.getTime()||0;
+    return bt-at;
+  }).slice(0,6);
+
+  document.getElementById('activity-list').innerHTML=recentSessions.length?recentSessions.map(s=>{
+    const t=s.lastSeen?.toDate?timeAgo(s.lastSeen.toDate()):'—';
+    return`<div class="activity-item">
+      <div class="act-icon" style="background:var(--blue)18;border:1px solid var(--blue)33;">👁️</div>
+      <div class="act-text"><strong>${s.email||'Unknown'}</strong> site pe active tha</div>
+      <div class="act-time">${t}</div>
+    </div>`;
+  }).join(''):`<div class="activity-item" style="justify-content:center;color:var(--muted);font-size:.85rem">Koi activity nahi.</div>`;
+}
+
+function timeAgo(date){
+  const diff=Math.floor((Date.now()-date.getTime())/1000);
+  if(diff<60)return diff+'s ago';
+  if(diff<3600)return Math.floor(diff/60)+'m ago';
+  if(diff<86400)return Math.floor(diff/3600)+'h ago';
+  return Math.floor(diff/86400)+'d ago';
+}
+
+document.getElementById('logout-btn').onclick=async()=>{await signOut(auth);location.href='login.html';};
+window.toggleSidebar=function(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('show');};
+window.closeSidebar=function(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('show');};
+</script>
+</body>
+</html>

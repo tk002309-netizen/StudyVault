@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Q&A Manager — Admin | StudyVault</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#040d1a;--bg2:#071224;--card:#0b1929;--card2:#0f2035;--border:#1a3a5c;--gold:#f0a500;--gold2:#ffd060;--blue:#1e90ff;--teal:#00d4aa;--text:#e8f0fe;--muted:#7a9abf;--danger:#ff4b6e;--sidebar:260px;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;}
+.sidebar{width:var(--sidebar);min-height:100vh;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:200;transition:.3s;}
+.sidebar-logo{padding:22px 20px;font-size:1.1rem;font-weight:800;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.sidebar-logo span{-webkit-text-fill-color:var(--blue);}
+.admin-pill{padding:2px 8px;border-radius:50px;background:var(--gold)22;border:1px solid var(--gold)44;color:var(--gold);font-size:.62rem;font-weight:700;-webkit-text-fill-color:var(--gold);}
+.nav-section{padding:16px 12px 8px;font-size:.65rem;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 16px;margin:2px 8px;border-radius:12px;cursor:pointer;color:var(--muted);font-size:.88rem;font-weight:500;transition:.2s;text-decoration:none;}
+.nav-item:hover{background:var(--card2);color:var(--text);}
+.nav-item.active{background:var(--gold)18;color:var(--gold);font-weight:600;}
+.nav-item .icon{font-size:1rem;width:22px;text-align:center;}
+.sidebar-bottom{margin-top:auto;padding:16px;border-top:1px solid var(--border);}
+.btn-logout{width:100%;padding:10px;border-radius:10px;background:var(--danger)18;border:1px solid var(--danger)44;color:var(--danger);font-size:.85rem;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;}
+.main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;}
+.topbar{position:sticky;top:0;z-index:100;background:rgba(4,13,26,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;}
+.hamburger{display:none;background:none;border:none;color:var(--text);font-size:1.4rem;cursor:pointer;padding:4px;}
+.content{padding:28px;flex:1;}
+
+/* Subject selector */
+.subject-selector{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.subject-selector label{font-size:.82rem;color:var(--muted);font-weight:600;white-space:nowrap;}
+.subject-selector select{flex:1;min-width:200px;padding:10px 14px;background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-size:.88rem;font-family:'Sora',sans-serif;outline:none;}
+.subject-selector select:focus{border-color:var(--gold)88;}
+.btn-new{padding:10px 20px;border-radius:50px;background:linear-gradient(135deg,var(--gold),#e08800);color:#040d1a;font-size:.85rem;font-weight:700;border:none;cursor:pointer;font-family:'Sora',sans-serif;white-space:nowrap;}
+
+/* Q&A LIST */
+.qa-list{display:flex;flex-direction:column;gap:12px;}
+.qa-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:.2s;}
+.qa-card:hover{border-color:var(--gold)44;}
+.qa-card-head{padding:14px 18px;display:flex;align-items:flex-start;gap:12px;}
+.qa-num{width:28px;height:28px;border-radius:8px;background:var(--gold)20;border:1px solid var(--gold)44;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;color:var(--gold);flex-shrink:0;margin-top:2px;}
+.qa-q-text{flex:1;font-size:.9rem;font-weight:600;line-height:1.5;font-family:'Noto Sans Devanagari','Sora',sans-serif;}
+.qa-card-actions{display:flex;gap:8px;flex-shrink:0;}
+.btn-edit-q{padding:5px 12px;border-radius:7px;background:var(--blue)18;border:1px solid var(--blue)44;color:var(--blue);font-size:.74rem;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;}
+.btn-del-q{padding:5px 12px;border-radius:7px;background:var(--danger)18;border:1px solid var(--danger)44;color:var(--danger);font-size:.74rem;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;}
+.qa-answer-preview{padding:0 18px 14px 58px;font-size:.83rem;color:var(--muted);font-family:'Noto Sans Devanagari','Sora',sans-serif;line-height:1.6;border-top:1px solid var(--border)44;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:#000000cc;z-index:500;display:none;align-items:flex-start;justify-content:center;padding:30px 20px;backdrop-filter:blur(6px);overflow-y:auto;}
+.modal-overlay.show{display:flex;}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:20px;width:100%;max-width:680px;overflow:hidden;animation:fadeUp .3s ease;margin:auto;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.modal-head{background:var(--bg2);border-bottom:1px solid var(--border);padding:18px 24px;display:flex;align-items:center;justify-content:space-between;}
+.modal-head h3{font-size:1rem;font-weight:700;}
+.modal-close{background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;}
+.modal-body{padding:24px;}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:7px;font-weight:600;}
+.field input,.field textarea{width:100%;padding:12px 14px;background:var(--bg2);border:1.5px solid var(--border);border-radius:12px;color:var(--text);font-size:.9rem;font-family:'Noto Sans Devanagari','Sora',sans-serif;outline:none;transition:.2s;}
+.field input:focus,.field textarea:focus{border-color:var(--gold)88;}
+.field textarea{resize:vertical;min-height:180px;line-height:1.7;}
+/* rich text toolbar */
+.toolbar{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;}
+.tb-btn{padding:5px 10px;border-radius:6px;background:var(--card2);border:1px solid var(--border);color:var(--text);font-size:.78rem;cursor:pointer;font-family:'Sora',sans-serif;transition:.2s;}
+.tb-btn:hover{border-color:var(--gold)55;color:var(--gold);}
+/* free preview toggle */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg2);border:1.5px solid var(--border);border-radius:12px;margin-bottom:16px;}
+.toggle{position:relative;width:44px;height:24px;flex-shrink:0;}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;inset:0;background:var(--border);border-radius:50px;cursor:pointer;transition:.3s;}
+.toggle-slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:white;border-radius:50%;transition:.3s;}
+.toggle input:checked+.toggle-slider{background:var(--teal);}
+.toggle input:checked+.toggle-slider::before{transform:translateX(20px);}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;}
+.btn-cancel{padding:10px 20px;border-radius:50px;background:var(--card2);border:1px solid var(--border);color:var(--muted);font-size:.88rem;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;}
+.btn-save{padding:10px 24px;border-radius:50px;background:linear-gradient(135deg,var(--gold),#e08800);color:#040d1a;font-size:.88rem;font-weight:700;border:none;cursor:pointer;font-family:'Sora',sans-serif;}
+.msg{padding:10px 14px;border-radius:10px;font-size:.83rem;margin-bottom:14px;display:none;}
+.msg.error{background:var(--danger)22;color:var(--danger);border:1px solid var(--danger)44;display:block;}
+.msg.success{background:var(--teal)22;color:var(--teal);border:1px solid var(--teal)44;display:block;}
+.empty{text-align:center;padding:48px 20px;color:var(--muted);}
+.skeleton{background:linear-gradient(90deg,var(--card) 25%,var(--card2) 50%,var(--card) 75%);background-size:200%;animation:sh 1.4s infinite;border-radius:8px;}
+@keyframes sh{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.overlay{display:none;position:fixed;inset:0;background:#00000088;z-index:150;}
+@media(max-width:900px){.sidebar{left:calc(-1*var(--sidebar));}.sidebar.open{left:0;}.overlay.show{display:block;}.main{margin-left:0;}.hamburger{display:block;}.content{padding:16px;}}
+</style>
+</head>
+<body>
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-logo">Study<span>Vault</span><span class="admin-pill">ADMIN</span></div>
+  <div class="nav-section">Overview</div>
+  <a class="nav-item" href="dashboard.html"><span class="icon">📊</span>Dashboard</a>
+  <a class="nav-item" href="students.html"><span class="icon">👥</span>Students</a>
+  <div class="nav-section">Content</div>
+  <a class="nav-item" href="subjects.html"><span class="icon">📚</span>Subjects</a>
+  <a class="nav-item active" href="questions.html"><span class="icon">❓</span>Q&A Manager</a>
+  <div class="nav-section">Settings</div>
+  <a class="nav-item" href="contact-settings.html"><span class="icon">📞</span>Contact & Buy Links</a>
+  <a class="nav-item" href="watermark.html"><span class="icon">💧</span>Watermark Settings</a>
+  <div class="nav-section">Site</div>
+  <a class="nav-item" href="../index.html" target="_blank"><span class="icon">🌐</span>View User Site</a>
+  <div class="sidebar-bottom"><button class="btn-logout" id="logout-btn">🚪 Logout</button></div>
+</div>
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<div class="main">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="hamburger" onclick="toggleSidebar()">☰</button>
+      <div style="font-size:1rem;font-weight:700;">❓ Q&A Manager</div>
+    </div>
+    <button class="btn-new" onclick="openModal()">➕ New Question</button>
+  </div>
+  <div class="content">
+    <div class="subject-selector">
+      <label>📚 Subject Select Karo:</label>
+      <select id="subject-select" onchange="loadQuestions()">
+        <option value="">-- Subject Choose Karo --</option>
+      </select>
+    </div>
+    <div class="qa-list" id="qa-list">
+      <div style="text-align:center;padding:40px;color:var(--muted)">👆 Pehle ek subject select karo</div>
+    </div>
+  </div>
+</div>
+
+<!-- Q&A MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modal-title">➕ New Question</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="msg" id="modal-msg"></div>
+      <input type="hidden" id="edit-qid"/>
+      <div class="field">
+        <label>Question (Hindi/English dono theek hai) *</label>
+        <input type="text" id="f-question" placeholder="e.g. तुलनात्मक राजनीति से क्या समझते हैं?"/>
+      </div>
+      <div class="field">
+        <label>Answer (Formatting support: **bold**, lists with -, headings with ##)</label>
+        <div class="toolbar">
+          <button class="tb-btn" onclick="insertTag('**','**')"><b>B</b></button>
+          <button class="tb-btn" onclick="insertLine('## ')">H4</button>
+          <button class="tb-btn" onclick="insertLine('- ')">• List</button>
+          <button class="tb-btn" onclick="insertTag('\n\n','')">¶ Para</button>
+        </div>
+        <textarea id="f-answer" placeholder="Yahan detailed answer likho...&#10;&#10;**Bold text** ke liye double star use karo.&#10;- List item ke liye dash se shuru karo.&#10;## Section heading ke liye double hash use karo." rows="10"></textarea>
+      </div>
+      <div class="toggle-row">
+        <div>
+          <div style="font-size:.88rem;font-weight:600">👁️ Free Preview</div>
+          <div style="font-size:.74rem;color:var(--muted);margin-top:2px">ON karo toh ye question unpurchased users ko bhi dikhega</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="f-preview"/>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="field">
+        <label>Order Number (1, 2, 3...)</label>
+        <input type="number" id="f-order" placeholder="1" min="1"/>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" id="save-q-btn" onclick="saveQuestion()">💾 Save Question</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import{getAuth,onAuthStateChanged,signOut}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import{getFirestore,doc,getDoc,collection,getDocs,addDoc,updateDoc,deleteDoc,
+  query,orderBy,serverTimestamp,increment}
+  from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const app=initializeApp({apiKey:"AIzaSyDY0lVUA4Ph7wV1MciIE4ICv0Wkn06nHqY",authDomain:"clash-code.firebaseapp.com",projectId:"clash-code",storageBucket:"clash-code.firebasestorage.app",messagingSenderId:"167202813766",appId:"1:167202813766:web:a2e16409f5b6d5ae569747"});
+const auth=getAuth(app);const db=getFirestore(app);
+
+let currentSubjectId='';
+let questions=[];
+
+onAuthStateChanged(auth,async u=>{
+  if(!u){location.href='login.html';return;}
+  const snap=await getDoc(doc(db,'users',u.uid));
+  if(snap.data()?.role!=='admin'){location.href='login.html';return;}
+  loadSubjectsList();
+  // pre-select if URL param
+  const param=new URLSearchParams(location.search).get('subject');
+  if(param){currentSubjectId=param;document.getElementById('subject-select').value=param;loadQuestions();}
+});
+
+async function loadSubjectsList(){
+  const snap=await getDocs(collection(db,'subjects'));
+  const select=document.getElementById('subject-select');
+  snap.forEach(d=>{
+    const opt=document.createElement('option');
+    opt.value=d.id;opt.textContent=d.data().name;
+    if(d.id===currentSubjectId)opt.selected=true;
+    select.appendChild(opt);
+  });
+}
+
+window.loadQuestions=async function(){
+  currentSubjectId=document.getElementById('subject-select').value;
+  const list=document.getElementById('qa-list');
+  if(!currentSubjectId){list.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">👆 Subject select karo</div>';return;}
+  list.innerHTML='<div class="skeleton" style="height:80px;"></div><div class="skeleton" style="height:80px;margin-top:12px;"></div>';
+  const snap=await getDocs(query(collection(db,'subjects',currentSubjectId,'questions'),orderBy('order','asc')));
+  questions=[];snap.forEach(d=>questions.push({id:d.id,...d.data()}));
+  renderQuestions();
+};
+
+function renderQuestions(){
+  const list=document.getElementById('qa-list');
+  if(!questions.length){
+    list.innerHTML='<div class="empty">📭 Koi question nahi. Pehla question add karo!</div>';return;
+  }
+  list.innerHTML=questions.map((q,i)=>{
+    const answerPreview=q.answer?q.answer.substring(0,120)+(q.answer.length>120?'...':''):'—';
+    return`<div class="qa-card">
+      <div class="qa-card-head">
+        <div class="qa-num">Q${i+1}</div>
+        <div class="qa-q-text">${q.question}</div>
+        <div class="qa-card-actions">
+          ${q.freePreview?`<span style="font-size:.7rem;color:var(--teal);border:1px solid var(--teal)44;padding:3px 8px;border-radius:50px;background:var(--teal)15">👁️ Preview</span>`:'' }
+          <button class="btn-edit-q" onclick="editQuestion('${q.id}')">✏️</button>
+          <button class="btn-del-q" onclick="deleteQuestion('${q.id}')">🗑️</button>
+        </div>
+      </div>
+      <div class="qa-answer-preview">${answerPreview}</div>
+    </div>`;
+  }).join('');
+}
+
+window.openModal=function(){
+  if(!currentSubjectId){alert('Pehle subject select karo!');return;}
+  document.getElementById('modal-msg').className='msg';
+  document.getElementById('edit-qid').value='';
+  document.getElementById('f-question').value='';
+  document.getElementById('f-answer').value='';
+  document.getElementById('f-preview').checked=false;
+  document.getElementById('f-order').value=questions.length+1;
+  document.getElementById('modal-title').textContent='➕ New Question';
+  document.getElementById('modal').classList.add('show');
+};
+
+window.editQuestion=function(id){
+  const q=questions.find(x=>x.id===id);if(!q)return;
+  document.getElementById('modal-msg').className='msg';
+  document.getElementById('edit-qid').value=id;
+  document.getElementById('f-question').value=q.question||'';
+  document.getElementById('f-answer').value=q.answer||'';
+  document.getElementById('f-preview').checked=!!q.freePreview;
+  document.getElementById('f-order').value=q.order||1;
+  document.getElementById('modal-title').textContent='✏️ Edit Question';
+  document.getElementById('modal').classList.add('show');
+};
+window.closeModal=function(){document.getElementById('modal').classList.remove('show');};
+
+window.saveQuestion=async function(){
+  const question=document.getElementById('f-question').value.trim();
+  const answer=document.getElementById('f-answer').value.trim();
+  const freePreview=document.getElementById('f-preview').checked;
+  const order=parseInt(document.getElementById('f-order').value)||questions.length+1;
+  const editId=document.getElementById('edit-qid').value;
+  const msg=document.getElementById('modal-msg');
+  msg.className='msg';
+  if(!question){msg.className='msg error';msg.textContent='Question likhna zaroori hai.';return;}
+  if(!answer){msg.className='msg error';msg.textContent='Answer bhi likhna zaroori hai.';return;}
+  const btn=document.getElementById('save-q-btn');
+  btn.disabled=true;btn.textContent='Saving...';
+  try{
+    const data={question,answer:parseMarkdown(answer),answerRaw:answer,freePreview,order,updatedAt:serverTimestamp()};
+    const qColl=collection(db,'subjects',currentSubjectId,'questions');
+    if(editId){
+      await updateDoc(doc(db,'subjects',currentSubjectId,'questions',editId),data);
+    }else{
+      data.createdAt=serverTimestamp();
+      await addDoc(qColl,data);
+      // update count
+      await updateDoc(doc(db,'subjects',currentSubjectId),{questionCount:increment(1)});
+    }
+    closeModal();await window.loadQuestions();
+  }catch(e){msg.className='msg error';msg.textContent='Error: '+e.message;}
+  btn.disabled=false;btn.textContent='💾 Save Question';
+};
+
+window.deleteQuestion=async function(id){
+  if(!confirm('Yeh question delete karna chahte ho?'))return;
+  try{
+    await deleteDoc(doc(db,'subjects',currentSubjectId,'questions',id));
+    await updateDoc(doc(db,'subjects',currentSubjectId),{questionCount:increment(-1)});
+    await window.loadQuestions();
+  }catch(e){alert('Delete fail: '+e.message);}
+};
+
+// Simple Markdown → HTML
+function parseMarkdown(text){
+  return text
+    .replace(/\*\*(.*?)\*\*/g,'<b>$1</b>')
+    .replace(/^## (.+)$/gm,'<h4>$1</h4>')
+    .replace(/^- (.+)$/gm,'<li>$1</li>')
+    .replace(/(<li>.*<\/li>)/gs,'<ul>$1</ul>')
+    .replace(/\n\n/g,'</p><p>')
+    .replace(/\n/g,'<br/>');
+}
+
+// Toolbar helpers
+window.insertTag=function(open,close){
+  const ta=document.getElementById('f-answer');
+  const start=ta.selectionStart,end=ta.selectionEnd;
+  const sel=ta.value.substring(start,end);
+  ta.value=ta.value.substring(0,start)+open+sel+close+ta.value.substring(end);
+  ta.focus();ta.setSelectionRange(start+open.length,start+open.length+sel.length);
+};
+window.insertLine=function(prefix){
+  const ta=document.getElementById('f-answer');
+  const pos=ta.selectionStart;
+  ta.value=ta.value.substring(0,pos)+'\n'+prefix+ta.value.substring(pos);
+  ta.focus();ta.setSelectionRange(pos+prefix.length+1,pos+prefix.length+1);
+};
+
+document.getElementById('modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
+document.getElementById('logout-btn').onclick=async()=>{await signOut(auth);location.href='login.html';};
+window.toggleSidebar=function(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('show');};
+window.closeSidebar=function(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('show');};
+</script>
+</body>
+</html>

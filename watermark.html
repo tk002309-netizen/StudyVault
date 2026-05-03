@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Watermark Settings — Admin | StudyVault</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#040d1a;--bg2:#071224;--card:#0b1929;--card2:#0f2035;--border:#1a3a5c;--gold:#f0a500;--gold2:#ffd060;--blue:#1e90ff;--teal:#00d4aa;--text:#e8f0fe;--muted:#7a9abf;--danger:#ff4b6e;--sidebar:260px;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;}
+.sidebar{width:var(--sidebar);min-height:100vh;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:200;transition:.3s;}
+.sidebar-logo{padding:22px 20px;font-size:1.1rem;font-weight:800;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.sidebar-logo span{-webkit-text-fill-color:var(--blue);}
+.admin-pill{padding:2px 8px;border-radius:50px;background:var(--gold)22;border:1px solid var(--gold)44;color:var(--gold);font-size:.62rem;font-weight:700;-webkit-text-fill-color:var(--gold);}
+.nav-section{padding:16px 12px 8px;font-size:.65rem;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 16px;margin:2px 8px;border-radius:12px;cursor:pointer;color:var(--muted);font-size:.88rem;font-weight:500;transition:.2s;text-decoration:none;}
+.nav-item:hover{background:var(--card2);color:var(--text);}
+.nav-item.active{background:var(--gold)18;color:var(--gold);font-weight:600;}
+.nav-item .icon{font-size:1rem;width:22px;text-align:center;}
+.sidebar-bottom{margin-top:auto;padding:16px;border-top:1px solid var(--border);}
+.btn-logout{width:100%;padding:10px;border-radius:10px;background:var(--danger)18;border:1px solid var(--danger)44;color:var(--danger);font-size:.85rem;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;}
+.main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;}
+.topbar{position:sticky;top:0;z-index:100;background:rgba(4,13,26,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 28px;height:60px;display:flex;align-items:center;}
+.hamburger{display:none;background:none;border:none;color:var(--text);font-size:1.4rem;cursor:pointer;padding:4px;margin-right:12px;}
+.content{padding:28px;flex:1;max-width:660px;}
+.settings-card{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;margin-bottom:24px;}
+.settings-card-head{padding:18px 22px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.settings-card-head h3{font-size:.95rem;font-weight:700;}
+.settings-card-body{padding:22px;}
+.field{margin-bottom:18px;}
+.field label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:7px;font-weight:600;}
+.field-desc{font-size:.74rem;color:#5a7a9f;margin-top:4px;}
+.field input{width:100%;padding:12px 14px;background:var(--bg2);border:1.5px solid var(--border);border-radius:12px;color:var(--text);font-size:.9rem;font-family:'Sora',sans-serif;outline:none;transition:.2s;}
+.field input:focus{border-color:var(--gold)88;}
+/* opacity slider */
+.slider-row{display:flex;align-items:center;gap:14px;}
+.slider-row input[type=range]{flex:1;accent-color:var(--gold);height:4px;}
+.slider-val{font-size:.9rem;font-weight:700;color:var(--gold);min-width:36px;text-align:right;}
+/* toggle */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--bg2);border:1.5px solid var(--border);border-radius:12px;margin-bottom:16px;}
+.toggle{position:relative;width:44px;height:24px;flex-shrink:0;}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;inset:0;background:var(--border);border-radius:50px;cursor:pointer;transition:.3s;}
+.toggle-slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:white;border-radius:50%;transition:.3s;}
+.toggle input:checked+.toggle-slider{background:var(--teal);}
+.toggle input:checked+.toggle-slider::before{transform:translateX(20px);}
+/* WATERMARK LIVE PREVIEW */
+.wm-preview-area{
+  position:relative;background:var(--bg2);border:1px solid var(--border);
+  border-radius:14px;padding:28px 20px;margin-top:16px;
+  min-height:140px;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+}
+.wm-sample-content{
+  position:relative;z-index:1;
+  font-size:.88rem;line-height:1.8;color:var(--text);
+  text-align:center;max-width:400px;
+}
+.wm-overlay{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  pointer-events:none;overflow:hidden;
+}
+.wm-text{
+  font-size:2rem;font-weight:900;
+  color:rgba(240,165,0,0.1);
+  transform:rotate(-22deg);
+  white-space:nowrap;letter-spacing:3px;
+  transition:.3s;
+}
+.label-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.label-row span{font-size:.8rem;color:var(--muted);font-weight:600;}
+/* save button */
+.btn-save-all{padding:13px 28px;border-radius:50px;background:linear-gradient(135deg,var(--gold),#e08800);color:#040d1a;font-size:.92rem;font-weight:700;border:none;cursor:pointer;font-family:'Sora',sans-serif;transition:.2s;}
+.btn-save-all:hover{opacity:.9;}
+.msg{padding:11px 16px;border-radius:10px;font-size:.85rem;margin-top:16px;display:none;}
+.msg.success{background:var(--teal)22;color:var(--teal);border:1px solid var(--teal)44;display:block;}
+.msg.error{background:var(--danger)22;color:var(--danger);border:1px solid var(--danger)44;display:block;}
+.info-box{background:var(--blue)12;border:1px solid var(--blue)33;border-radius:12px;padding:14px 16px;font-size:.83rem;color:var(--muted);line-height:1.6;margin-bottom:18px;}
+.info-box strong{color:var(--blue);}
+.overlay{display:none;position:fixed;inset:0;background:#00000088;z-index:150;}
+@media(max-width:900px){.sidebar{left:calc(-1*var(--sidebar));}.sidebar.open{left:0;}.overlay.show{display:block;}.main{margin-left:0;}.hamburger{display:block;}.content{padding:16px;}}
+</style>
+</head>
+<body>
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-logo">Study<span>Vault</span><span class="admin-pill">ADMIN</span></div>
+  <div class="nav-section">Overview</div>
+  <a class="nav-item" href="dashboard.html"><span class="icon">📊</span>Dashboard</a>
+  <a class="nav-item" href="students.html"><span class="icon">👥</span>Students</a>
+  <div class="nav-section">Content</div>
+  <a class="nav-item" href="subjects.html"><span class="icon">📚</span>Subjects</a>
+  <a class="nav-item" href="questions.html"><span class="icon">❓</span>Q&A Manager</a>
+  <div class="nav-section">Settings</div>
+  <a class="nav-item" href="contact-settings.html"><span class="icon">📞</span>Contact & Buy Links</a>
+  <a class="nav-item active" href="watermark.html"><span class="icon">💧</span>Watermark Settings</a>
+  <div class="nav-section">Site</div>
+  <a class="nav-item" href="../index.html" target="_blank"><span class="icon">🌐</span>View User Site</a>
+  <div class="sidebar-bottom"><button class="btn-logout" id="logout-btn">🚪 Logout</button></div>
+</div>
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<div class="main">
+  <div class="topbar">
+    <button class="hamburger" onclick="toggleSidebar()">☰</button>
+    <div style="font-size:1rem;font-weight:700;">💧 Watermark Settings</div>
+  </div>
+  <div class="content">
+    <div class="settings-card">
+      <div class="settings-card-head">
+        <span style="font-size:1.2rem">💧</span>
+        <h3>Content Watermark</h3>
+      </div>
+      <div class="settings-card-body">
+        <div class="info-box">
+          <strong>Watermark kya karta hai?</strong><br/>
+          Jab student content padhe, toh background mein faint text dikhta hai. Agar koi screenshot le bhi le, toh watermark usmein bhi aayega — jisse pata chalta hai content kahaan se liya.
+        </div>
+
+        <div class="toggle-row">
+          <div>
+            <div style="font-size:.88rem;font-weight:600">💧 Watermark Enable</div>
+            <div style="font-size:.74rem;color:var(--muted);margin-top:2px">Band karne par koi watermark nahi dikhega</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="wm-enabled" checked onchange="updatePreview()"/>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="field">
+          <label>Watermark Text (Brand Name)</label>
+          <input type="text" id="wm-text" value="StudyVault" maxlength="30" oninput="updatePreview()" placeholder="StudyVault"/>
+          <div class="field-desc">Yeh text content ke peeche dikhega. Student ka email automatically add hoga saath mein.</div>
+        </div>
+
+        <div class="field">
+          <div class="label-row">
+            <span>Opacity (kitna faint)</span>
+            <span class="slider-val" id="opacity-val">7%</span>
+          </div>
+          <div class="slider-row">
+            <span style="font-size:.75rem;color:var(--muted)">Faint</span>
+            <input type="range" id="wm-opacity" min="2" max="20" value="7" oninput="updateOpacity()"/>
+            <span style="font-size:.75rem;color:var(--muted)">Bold</span>
+          </div>
+          <div class="field-desc">Jitna zyada, utna zyada dikhega — lekin padhai mein distraction bhi zyada hoga.</div>
+        </div>
+
+        <!-- LIVE PREVIEW -->
+        <div style="font-size:.8rem;color:var(--muted);font-weight:600;margin-bottom:8px;">👁️ Live Preview:</div>
+        <div class="wm-preview-area">
+          <div class="wm-overlay" id="wm-overlay">
+            <div class="wm-text" id="wm-preview-text">StudyVault</div>
+          </div>
+          <div class="wm-sample-content">
+            तुलनात्मक राजनीति का मतलब है दुनिया के अलग-अलग देशों की राजनीतिक व्यवस्थाओं की आपस में तुलना करना।<br/><br/>
+            <span style="color:var(--muted);font-size:.78rem">← यह sample content है, watermark पीछे दिखेगा</span>
+          </div>
+        </div>
+
+        <div class="toggle-row" style="margin-top:18px;">
+          <div>
+            <div style="font-size:.88rem;font-weight:600">👤 Student Email Include Karo</div>
+            <div style="font-size:.74rem;color:var(--muted);margin-top:2px">Watermark mein student ka email bhi add hoga</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="wm-include-email" checked/>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <button class="btn-save-all" onclick="saveWatermark()">💾 Save Watermark Settings</button>
+        <div class="msg" id="wm-msg"></div>
+      </div>
+    </div>
+
+    <!-- ImgBB Key Card -->
+    <div class="settings-card">
+      <div class="settings-card-head">
+        <span style="font-size:1.2rem">🖼️</span>
+        <h3>ImgBB API Key (Thumbnail Upload)</h3>
+      </div>
+      <div class="settings-card-body">
+        <div class="info-box">
+          <strong>ImgBB kya hai?</strong><br/>
+          Subject thumbnail images ImgBB pe upload hoti hain — yeh free image hosting service hai. API key lene ke liye <strong>imgbb.com</strong> pe account banao → API section mein jao.
+        </div>
+        <div class="field">
+          <label>ImgBB API Key</label>
+          <input type="text" id="imgbb-key" placeholder="Apni ImgBB API key yahan daalo..."/>
+          <div class="field-desc">Yeh key subjects.html file mein IMGBB_KEY variable mein daalni hogi.</div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;font-size:.82rem;color:var(--muted);line-height:1.7;">
+          <strong style="color:var(--gold)">📝 Steps:</strong><br/>
+          1. <a href="https://imgbb.com" target="_blank" style="color:var(--blue)">imgbb.com</a> pe jao<br/>
+          2. Free account banao<br/>
+          3. Settings → API → API key copy karo<br/>
+          4. <code style="background:var(--card);padding:2px 6px;border-radius:4px;color:var(--gold)">admin/subjects.html</code> file mein line dhundo:<br/>
+          <code style="background:var(--card);padding:4px 8px;border-radius:4px;color:var(--teal);display:block;margin:6px 0">const IMGBB_KEY='your_imgbb_api_key_here';</code>
+          Aur apni key wahan daal do.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script type="module">
+import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import{getAuth,onAuthStateChanged,signOut}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import{getFirestore,doc,getDoc,setDoc}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+const app=initializeApp({apiKey:"AIzaSyDY0lVUA4Ph7wV1MciIE4ICv0Wkn06nHqY",authDomain:"clash-code.firebaseapp.com",projectId:"clash-code",storageBucket:"clash-code.firebasestorage.app",messagingSenderId:"167202813766",appId:"1:167202813766:web:a2e16409f5b6d5ae569747"});
+const auth=getAuth(app);const db=getFirestore(app);
+
+onAuthStateChanged(auth,async u=>{
+  if(!u){location.href='login.html';return;}
+  const snap=await getDoc(doc(db,'users',u.uid));
+  if(snap.data()?.role!=='admin'){location.href='login.html';return;}
+  loadSettings();
+});
+
+async function loadSettings(){
+  const snap=await getDoc(doc(db,'settings','watermark'));
+  if(!snap.exists())return;
+  const d=snap.data();
+  document.getElementById('wm-enabled').checked=d.enabled!==false;
+  document.getElementById('wm-text').value=d.text||'StudyVault';
+  document.getElementById('wm-opacity').value=d.opacity||7;
+  document.getElementById('wm-include-email').checked=d.includeEmail!==false;
+  updatePreview();updateOpacity();
+}
+
+window.updatePreview=function(){
+  const enabled=document.getElementById('wm-enabled').checked;
+  const text=document.getElementById('wm-text').value||'StudyVault';
+  const opacity=document.getElementById('wm-opacity').value/100;
+  const overlay=document.getElementById('wm-overlay');
+  const wmText=document.getElementById('wm-preview-text');
+  overlay.style.display=enabled?'flex':'none';
+  wmText.textContent=text+' • student@email.com';
+  wmText.style.color=`rgba(240,165,0,${opacity})`;
+};
+
+window.updateOpacity=function(){
+  const val=document.getElementById('wm-opacity').value;
+  document.getElementById('opacity-val').textContent=val+'%';
+  updatePreview();
+};
+
+window.saveWatermark=async function(){
+  const msg=document.getElementById('wm-msg');
+  msg.className='msg';
+  try{
+    await setDoc(doc(db,'settings','watermark'),{
+      enabled:document.getElementById('wm-enabled').checked,
+      text:document.getElementById('wm-text').value.trim()||'StudyVault',
+      opacity:parseInt(document.getElementById('wm-opacity').value)||7,
+      includeEmail:document.getElementById('wm-include-email').checked,
+    });
+    msg.className='msg success';msg.textContent='✓ Watermark settings save ho gayi!';
+    setTimeout(()=>msg.className='msg',3000);
+  }catch(e){msg.className='msg error';msg.textContent='Error: '+e.message;}
+};
+
+document.getElementById('logout-btn').onclick=async()=>{await signOut(auth);location.href='login.html';};
+window.toggleSidebar=function(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('show');};
+window.closeSidebar=function(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('show');};
+</script>
+</body>
+</html>
